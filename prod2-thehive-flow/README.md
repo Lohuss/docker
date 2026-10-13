@@ -28,6 +28,18 @@ It generates every secret into `.env` on the first run and keeps them on later r
 - Create a TheHive API key for TheHive Flow and store it in `./thehive-flow/secret/thehive-api-key` (or `thehive_api_key` in `.env`). TheHive Flow does not start without it.
 - If TheHive is on a private network, allowlist its range under `modules.workers.activities.egress` in `./thehive-flow/config/thehive-flow.yml`.
 
+## Endpoints
+
+TheHive Flow listens on port 8081 inside its container; only Nginx is published on the host.
+
+| Address | Content | Access |
+|---|---|---|
+| `https://<server name>/api/` | TheHive Flow API | TheHive addresses set at init (`nginx_thehive_addresses` in `.env`) only, 403 for any other caller |
+| `https://<server name>/webhook/` | Webhooks | Public |
+| `http://127.0.0.1:9090/livez`, `/readyz` | Health checks | This host only |
+
+The TheHive Flow URL to configure in TheHive is `https://<server name>`. Webhook URLs are built from `flow_public_url` in `.env` (default `https://<server name>`): change it when another proxy or a path prefix sits in front of Nginx.
+
 ## Operations
 
 ```bash
