@@ -24,7 +24,7 @@ It generates every secret into `.env` on the first run and keeps them on later r
 
 ## Connecting TheHive
 
-- In TheHive, enable the TheHive Flow connector, set its URL to `https://<this server>` and its JWT signing key (`TH_ORCHESTRATOR_KEY`) to the `jwt_signing_key` value of `.env`.
+- In TheHive, enable the TheHive Flow connector, set its URL to `https://<this server>` and its JWT signing key (`orchestrator.jwt_signing_key` in `application.conf`, or the `TH_ORCHESTRATOR_KEY` environment variable) to the `jwt_signing_key` value of `.env`.
 - Create a TheHive API key for TheHive Flow and store it in `./thehive-flow/secret/thehive-api-key` (or `thehive_api_key` in `.env`). TheHive Flow does not start without it.
 - If TheHive is on a private network, allowlist its range under `modules.workers.activities.egress` in `./thehive-flow/config/thehive-flow.yml`.
 

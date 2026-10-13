@@ -201,7 +201,7 @@ flow_db_password=${FLOW_DB_PASSWORD}
 temporal_db_password=${TEMPORAL_DB_PASSWORD}
 s3_access_key_id=thehive-flow
 s3_secret_access_key=${S3_SECRET_ACCESS_KEY}
-# Same value as TH_ORCHESTRATOR_KEY in TheHive
+# Same value as orchestrator.jwt_signing_key (or TH_ORCHESTRATOR_KEY) in TheHive
 jwt_signing_key=${JWT_SIGNING_KEY}
 thehive_api_key=
 flow_thehive_url=http://thehive:9000/thehive
