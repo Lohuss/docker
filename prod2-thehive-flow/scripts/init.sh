@@ -41,13 +41,14 @@ sed_escape() {
   printf '%s' "$1" | sed -e 's/[&|\\]/\\&/g'
 }
 
-ask() { ## ask VARIABLE "Prompt" default
-  local choice
+ask() { ## ask VARIABLE "Prompt" default [required]
+  local choice hint="default: ${3:-none}"
   if [[ "${ASSUME_YES}" -eq 1 ]]; then
     printf -v "$1" '%s' "${!1:-$3}"
     return
   fi
-  read -p "$2 (default: $3): " choice
+  [[ -z "$3" && "${4:-}" == "required" ]] && hint="required"
+  read -p "$2 (${hint}): " choice
   printf -v "$1" '%s' "${choice:-$3}"
 }
 
@@ -56,7 +57,7 @@ define_settings() {
   ask SERVICE_HOSTNAME "Server Name" "$(existing_value nginx_server_name | grep . || uname -n)"
 
   info "Define the TheHive URL, as reachable from the TheHive Flow container"
-  ask FLOW_THEHIVE_URL "TheHive URL, e.g. http://192.168.1.10:9000" "$(existing_value flow_thehive_url)"
+  ask FLOW_THEHIVE_URL "TheHive URL, e.g. http://192.168.1.10:9000" "$(existing_value flow_thehive_url)" required
   if [[ ! "${FLOW_THEHIVE_URL}" =~ ^https?://[^[:space:]]+$ ]]; then
     error "Invalid TheHive URL: '${FLOW_THEHIVE_URL}'. Expected http(s)://host[:port][/path]"
     exit 1
