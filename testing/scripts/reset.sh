@@ -18,7 +18,8 @@ then
 
   for D in ${DIRECTORIES}
   do
-    rm -rf ${D}/*
+    ## Includes hidden files (e.g. SeaweedFS key material), keeps .gitkeep
+    find "${D:?}" -mindepth 1 ! -name .gitkeep -delete
   done
   success "All data removed."
 
