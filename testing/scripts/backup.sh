@@ -137,7 +137,7 @@ echo "Elasticsearch backup completed."
 echo "Starting TheHive Flow backup..."
 for FOLDER in postgresql s3-store temporal thehive-flow
 do
-  rsync -aW --no-compress ${DOCKER_COMPOSE_PATH}/${FOLDER}/ ${BACKUP_FOLDER}/${FOLDER} || { echo "TheHive Flow ${FOLDER} backup failed"; exit 1; }
+  rsync -aW ${DOCKER_COMPOSE_PATH}/${FOLDER}/ ${BACKUP_FOLDER}/${FOLDER} || { echo "TheHive Flow ${FOLDER} backup failed"; exit 1; }
 done
 cp -p ${DOCKER_COMPOSE_PATH}/.env ${BACKUP_FOLDER}/dot.env || { echo ".env backup failed"; exit 1; }
 echo "TheHive Flow backup completed."

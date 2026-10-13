@@ -86,7 +86,7 @@ echo "Restoration process started at: $(date)"
 for FOLDER in postgresql s3-store thehive-flow temporal nginx certificates
 do
   echo "Restoring ${FOLDER}..."
-  rsync -aW --no-compress "${BACKUP_FOLDER}/${FOLDER}/" "${DOCKER_COMPOSE_PATH}/${FOLDER}" || { echo "${FOLDER} restore failed"; exit 1; }
+  rsync -aW "${BACKUP_FOLDER}/${FOLDER}/" "${DOCKER_COMPOSE_PATH}/${FOLDER}" || { echo "${FOLDER} restore failed"; exit 1; }
 done
 
 cp -p "${BACKUP_FOLDER}/dot.env" "${DOCKER_COMPOSE_PATH}/.env" || { echo ".env restore failed"; exit 1; }

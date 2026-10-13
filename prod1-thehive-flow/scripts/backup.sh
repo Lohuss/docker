@@ -79,21 +79,18 @@ echo "Created backup folder: ${BACKUP_FOLDER}"
 LOG_FILE="${BACKUP_ROOT_FOLDER}/backup_log_${DATE}.log"
 exec &> >(tee -a "$LOG_FILE")
 
-## Stop services
+## Stop services, and restart them on exit, including when a backup step fails
 docker compose -f "${DOCKER_COMPOSE_PATH}/docker-compose.yml" stop || { echo "Stopping services failed"; exit 1; }
+trap 'echo "Restarting services..."; docker compose -f "${DOCKER_COMPOSE_PATH}/docker-compose.yml" up -d' EXIT
 
 for FOLDER in postgresql s3-store thehive-flow temporal nginx certificates
 do
   echo "Starting ${FOLDER} backup..."
-  rsync -aW --no-compress "${DOCKER_COMPOSE_PATH}/${FOLDER}/" "${BACKUP_FOLDER}/${FOLDER}" || { echo "${FOLDER} backup failed"; exit 1; }
+  rsync -aW "${DOCKER_COMPOSE_PATH}/${FOLDER}/" "${BACKUP_FOLDER}/${FOLDER}" || { echo "${FOLDER} backup failed"; exit 1; }
   echo "${FOLDER} backup completed."
 done
 
 cp -p "${DOCKER_COMPOSE_PATH}/.env" "${BACKUP_FOLDER}/dot.env" || { echo ".env backup failed"; exit 1; }
 echo ".env backup completed (stored as dot.env)."
-
-## Restart services
-echo "Restarting services..."
-docker compose -f "${DOCKER_COMPOSE_PATH}/docker-compose.yml" up -d
 
 echo "Backup process completed at: $(date)"

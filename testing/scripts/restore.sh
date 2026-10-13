@@ -130,7 +130,7 @@ rsync -aW --no-compress ${BACKUP_FOLDER}/elasticsearch/ ${DOCKER_COMPOSE_PATH}/e
 echo "Restoring TheHive Flow data and configuration..."
 for FOLDER in postgresql s3-store temporal thehive-flow
 do
-  rsync -aW --no-compress ${BACKUP_FOLDER}/${FOLDER}/ ${DOCKER_COMPOSE_PATH}/${FOLDER} || { echo "TheHive Flow ${FOLDER} restore failed"; exit 1; }
+  rsync -aW ${BACKUP_FOLDER}/${FOLDER}/ ${DOCKER_COMPOSE_PATH}/${FOLDER} || { echo "TheHive Flow ${FOLDER} restore failed"; exit 1; }
 done
 cp -p ${BACKUP_FOLDER}/dot.env ${DOCKER_COMPOSE_PATH}/.env || { echo ".env restore failed"; exit 1; }
 
