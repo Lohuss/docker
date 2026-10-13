@@ -5,7 +5,7 @@ source $(dirname $0)/output.sh
 ## This program is run by init.sh program
 ##
 ## Not checked: database and object store contents (postgresql/data, s3-store/data), which
-## their services manage, and secrets (.env, thehive-flow/secret, rendered Temporal config), kept at 600.
+## their services manage, and secrets (.env, thehive-flow/secret, rendered Temporal config, TLS private keys), kept at 600.
 
 ASSUME_YES=${ASSUME_YES:-0}
 for arg in "$@"; do
@@ -18,7 +18,7 @@ CURRENT_USER_ID=$(id -u)
 CURRENT_GROUP_ID=$(id -g)
 
 DATA_DIRS=(-path ./postgresql/data -o -path ./s3-store/data)
-SECRET_FILES=(-path ./thehive-flow/secret/thehive-api-key -o -path ./temporal/config/temporal-server.yaml)
+SECRET_FILES=(-path ./thehive-flow/secret/thehive-api-key -o -path ./temporal/config/temporal-server.yaml -o -path './nginx/certs/*.key' -o -path './certificates/*.key')
 EXECUTABLE_FILES=(-path './scripts/*' -o -path './nginx/docker-entrypoint.d/*.sh')
 
 ## Ensure permissions are well set
@@ -49,7 +49,7 @@ NON_COMPLIANT_FILES=$(find ./docker-compose.yml ./dot.env.template ./certificate
 NON_COMPLIANT_EXECUTABLE_FILES=$(find ./scripts ./nginx -type f \( "${EXECUTABLE_FILES[@]}" \) ! -perm 755)
 
 ## List secret files with unexpected permissions (should be 600)
-NON_COMPLIANT_SECRET_FILES=$(find ./thehive-flow ./temporal -type f \( "${SECRET_FILES[@]}" \) ! -perm 600)
+NON_COMPLIANT_SECRET_FILES=$(find ./thehive-flow ./temporal ./nginx ./certificates -type f \( "${SECRET_FILES[@]}" \) ! -perm 600)
 
 if [ -z "${NON_COMPLIANT_DIRS}" ] &&\
    [ -z "${NON_COMPLIANT_FILES}" ] &&\
