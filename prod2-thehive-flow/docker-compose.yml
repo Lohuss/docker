@@ -187,7 +187,7 @@ services:
     # Shutdown timeout (20s) plus telemetry flush (~5s)
     stop_grace_period: 30s
     environment:
-      # Shared with TheHive (orchestrator.jwt_signing_key or TH_ORCHESTRATOR_KEY): TheHive signs, TheHive Flow verifies
+      # Shared with TheHive (flow.jwt_signing_key): TheHive signs, TheHive Flow verifies
       - BEEFLOW_SECRET_JWT_SYMMETRIC_KEY=${jwt_signing_key}
       # TheHive API key for TheHive Flow -> TheHive calls. When empty, read from ./thehive-flow/secret/thehive-api-key
       - BEEFLOW_SECRET_THEHIVE_API_KEY=${thehive_api_key}

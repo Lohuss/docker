@@ -203,7 +203,7 @@ init() {
   fi
 
   success "Initialisation completed."
-  info "Set jwt_signing_key from ${ENVFILE} in TheHive: orchestrator.jwt_signing_key in application.conf, or environment variable TH_ORCHESTRATOR_KEY"
+  info "Set jwt_signing_key from ${ENVFILE} in TheHive: flow.jwt_signing_key in application.conf (TH_FLOW_KEY when TheHive runs without --no-config)"
   info "Run the following command to start applications:
         $ docker compose up -d
         "

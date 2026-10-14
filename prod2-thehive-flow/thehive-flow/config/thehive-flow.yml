@@ -31,7 +31,7 @@ api:
     enable: true
     addr: "0.0.0.0:8081"
     jwt:
-      # Shared with TheHive (orchestrator.jwt_signing_key or TH_ORCHESTRATOR_KEY); set by BEEFLOW_SECRET_JWT_SYMMETRIC_KEY
+      # Shared with TheHive (flow.jwt_signing_key); set by BEEFLOW_SECRET_JWT_SYMMETRIC_KEY
       secret: ""
 
 modules:
