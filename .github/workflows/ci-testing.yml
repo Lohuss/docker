@@ -41,9 +41,9 @@ jobs:
       # TheHive Flow has no container healthcheck (distroless image): poll its readiness endpoint
       - name: TheHive Flow readiness
         run: |
-          for i in $(seq 1 30); do
+          for i in $(seq 1 150); do
             curl -fsS http://127.0.0.1:9090/readyz && exit 0
-            sleep 5
+            sleep 1
           done
           echo "TheHive Flow is not ready"
           exit 1
