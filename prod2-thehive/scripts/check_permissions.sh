@@ -35,13 +35,13 @@ fi
 NON_COMPLIANT_DIRS=$(find ./cassandra ./certificates ./elasticsearch ./nginx ./scripts ./thehive -type d ! -perm 750)
 
 ## List non-executable files with unexpected permissions (should be 644)
-NON_COMPLIANT_FILES=$(find ./docker-compose.yml ./dot.env.template ./cassandra ./certificates ./elasticsearch ./nginx ./thehive -type f ! -name '*.key' ! -perm 644)
+NON_COMPLIANT_FILES=$(find ./docker-compose.yml ./dot.env.template ./cassandra ./certificates ./elasticsearch ./nginx ./thehive -type f ! -name '*.key' ! -path ./thehive/config/flow.conf ! -perm 644)
 
 ## List executable files with unexpected permissions (should be 755)
 NON_COMPLIANT_EXECUTABLE_FILES=$(find ./scripts -type f ! -perm 755)
 
-## List private keys with unexpected permissions (should be 600)
-NON_COMPLIANT_KEY_FILES=$(find ./certificates ./nginx -type f -name '*.key' ! -perm 600)
+## List private keys and TheHive Flow connection settings (JWT signing key) with unexpected permissions (should be 600)
+NON_COMPLIANT_KEY_FILES=$(find ./certificates ./nginx ./thehive/config -type f \( -name '*.key' -o -path ./thehive/config/flow.conf \) ! -perm 600)
 
 if [ -z "${NON_COMPLIANT_DIRS}" ] &&\
    [ -z "${NON_COMPLIANT_FILES}" ] &&\

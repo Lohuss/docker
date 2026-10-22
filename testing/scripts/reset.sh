@@ -28,7 +28,7 @@ then
   rm ./thehive/config/secret.conf
   rm ./cortex/config/index.conf
   rm ./cortex/config/secret.conf
-  rm -f ./temporal/config/temporal-server.yaml ./thehive-flow/secret/thehive-api-key
+  rm -f ./temporal/config/temporal-server.yaml ./thehive-flow/secret/thehive-api-key ./thehive/config/flow.conf
   success "index and secret files deleted."
 
   ## DELETE cert files

@@ -38,6 +38,14 @@ jobs:
       - name: Start the stack (gated on health)
         run: docker compose up -d --wait --wait-timeout 600
 
+      # Debug: images and versions actually run, and the state of each service, also when the start fails
+      - name: Show running images and state
+        if: always()
+        run: |
+          docker compose images
+          echo
+          docker compose ps -a --format 'table {{.Service}}\t{{.Image}}\t{{.State}}\t{{.Status}}'
+
       # TheHive Flow has no container healthcheck (distroless image): poll its readiness endpoint
       - name: TheHive Flow readiness
         run: |
@@ -47,6 +55,9 @@ jobs:
           done
           echo "TheHive Flow is not ready"
           exit 1
+
+      - name: TheHive Flow connection test (connector, JWT authentication)
+        run: bash ./tests/flow.sh
 
       - name: Smoke test (org / user / case / alert workflow)
         run: bash ./tests/smoke.sh
