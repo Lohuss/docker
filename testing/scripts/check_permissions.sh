@@ -44,7 +44,7 @@ NON_COMPLIANT_CORTEX_DIRS=$(find ./cortex -type d ! -perm 755)
 
 ## List non-executable files with unexpected permissions (should be 644)
 NON_COMPLIANT_FILES=$(find ./docker-compose.yml ./dot.env.template ./cassandra ./certificates ./cortex ./elasticsearch ./nginx ./thehive ./postgresql ./s3-store ./temporal ./thehive-flow \
-  \( "${FLOW_DATA_DIRS[@]}" \) -prune -o -type f ! -path ./thehive-flow/secret/thehive-api-key ! -path ./temporal/config/temporal-server.yaml ! -name '*.key' ! -perm 644 -print)
+  \( "${FLOW_DATA_DIRS[@]}" \) -prune -o -type f ! -path ./thehive-flow/secret/thehive-api-key ! -path ./temporal/config/temporal-server.yaml ! -path ./thehive/config/flow.conf ! -name '*.key' ! -perm 644 -print)
 
 ## List executable files with unexpected permissions (should be 755)
 NON_COMPLIANT_EXECUTABLE_FILES=$(find ./scripts -type f ! -perm 755)

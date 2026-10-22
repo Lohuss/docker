@@ -17,6 +17,7 @@
 # Ignore custom configuration files for TheHive
 /*/thehive/config/index.conf
 /*/thehive/config/secret.conf
+/*/thehive/config/flow.conf
 
 # Ignore custom configuration files for Cortex
 /*/cortex/config/index.conf

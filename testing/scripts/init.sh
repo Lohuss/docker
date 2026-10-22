@@ -212,6 +212,15 @@ _EOF_
 
     ## INIT THEHIVE FLOW
     render_temporal_config
+    ## TheHive connection to TheHive Flow, included by thehive/config/application.conf
+    THEHIVEFLOWFILE="./thehive/config/flow.conf"
+    cat > ${THEHIVEFLOWFILE} << _EOF_
+flow.url = "http://thehive-flow:8081"
+flow.jwt_signing_key = "${JWT_SIGNING_KEY}"
+features.Orchestrator.enabled = true
+scalligraph.modules += org.thp.thehive.connector.flow.FlowModule
+_EOF_
+    chmod 600 ${THEHIVEFLOWFILE}
     ## TheHive Flow does not start without a TheHive API key: use a placeholder until one is created in TheHive
     THEHIVE_API_KEY_FILE="./thehive-flow/secret/thehive-api-key"
     if [[ ! -s "${THEHIVE_API_KEY_FILE}" ]]

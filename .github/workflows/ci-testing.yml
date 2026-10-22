@@ -48,6 +48,9 @@ jobs:
           echo "TheHive Flow is not ready"
           exit 1
 
+      - name: TheHive Flow connection test (connector, JWT authentication)
+        run: bash ./tests/flow.sh
+
       - name: Smoke test (org / user / case / alert workflow)
         run: bash ./tests/smoke.sh
 
