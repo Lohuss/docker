@@ -214,13 +214,18 @@ _EOF_
     render_temporal_config
     ## TheHive connection to TheHive Flow, included by thehive/config/application.conf
     THEHIVEFLOWFILE="./thehive/config/flow.conf"
-    cat > ${THEHIVEFLOWFILE} << _EOF_
+    if [[ ${#JWT_SIGNING_KEY} -lt 32 || "${JWT_SIGNING_KEY}" == *[\"\\]* ]]; then
+        error "Invalid jwt_signing_key in ${ENVFILE}: at least 32 characters, without quotes or backslashes (is openssl installed?)"
+        exit 1
+    fi
+    ## Created readable by its owner only: the file holds the JWT signing key
+    ( umask 077 && cat > "${THEHIVEFLOWFILE}" ) << _EOF_ || { error "Cannot write ${THEHIVEFLOWFILE}"; exit 1; }
 flow.url = "http://thehive-flow:8081"
 flow.jwt_signing_key = "${JWT_SIGNING_KEY}"
 features.Orchestrator.enabled = true
 scalligraph.modules += org.thp.thehive.connector.flow.FlowModule
 _EOF_
-    chmod 600 ${THEHIVEFLOWFILE}
+    chmod 600 "${THEHIVEFLOWFILE}" || { error "Cannot set permissions on ${THEHIVEFLOWFILE}"; exit 1; }
     ## TheHive Flow does not start without a TheHive API key: use a placeholder until one is created in TheHive
     THEHIVE_API_KEY_FILE="./thehive-flow/secret/thehive-api-key"
     if [[ ! -s "${THEHIVE_API_KEY_FILE}" ]]
