@@ -45,10 +45,6 @@ jobs:
           docker compose images
           echo
           docker compose ps -a --format 'table {{.Service}}\t{{.Image}}\t{{.State}}\t{{.Status}}'
-          echo
-          docker compose images -q | sort -u \
-            | xargs -r docker image inspect --format '{{if .RepoTags}}{{index .RepoTags 0}}{{else}}<untagged>{{end}}  {{if .RepoDigests}}{{index .RepoDigests 0}}{{end}}' \
-            | sort
 
       # TheHive Flow has no container healthcheck (distroless image): poll its readiness endpoint
       - name: TheHive Flow readiness
