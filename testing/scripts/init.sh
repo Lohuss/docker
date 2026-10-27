@@ -5,6 +5,7 @@
 
 source $(dirname $0)/output.sh         # Used to display output
 source $(dirname $0)/generate_certs.sh # Used to generate self signed or custom certificate
+source $(dirname $0)/setup_flow_access.sh # Used to create the TheHive service account and API key of TheHive Flow
 
 ASSUME_YES=${ASSUME_YES:-0}
 for arg in "$@"; do
@@ -226,16 +227,16 @@ features.Orchestrator.enabled = true
 scalligraph.modules += org.thp.thehive.connector.flow.FlowModule
 _EOF_
     chmod 600 "${THEHIVEFLOWFILE}" || { error "Cannot set permissions on ${THEHIVEFLOWFILE}"; exit 1; }
-    ## TheHive Flow does not start without a TheHive API key: use a placeholder until one is created in TheHive
+    ## TheHive Flow does not start without a TheHive API key file: placeholder until setup_thehive_flow_access replaces it
     THEHIVE_API_KEY_FILE="./thehive-flow/secret/thehive-api-key"
     if [[ ! -s "${THEHIVE_API_KEY_FILE}" ]]
     then
-        printf '%s' 'replace-with-a-thehive-api-key' > "${THEHIVE_API_KEY_FILE}"
+        printf '%s' "${FLOW_API_KEY_PLACEHOLDER}" > "${THEHIVE_API_KEY_FILE}"
         chmod 600 "${THEHIVE_API_KEY_FILE}"
-        warning "Placeholder TheHive API key written to ${THEHIVE_API_KEY_FILE}: replace it with a TheHive API key to let TheHive Flow call TheHive."
     fi
     setup_databases
     setup_temporal
+    setup_thehive_flow_access
 
     if [ ${STATUS} == 0 ]
     then
