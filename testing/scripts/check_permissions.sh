@@ -22,7 +22,7 @@ UNEXPECTED_OWNERSHIP=$(find . ! -user ${CURRENT_USER_ID} -o ! -group ${CURRENT_G
 if [ -n "${UNEXPECTED_OWNERSHIP}" ];
 then
   echo "${UNEXPECTED_OWNERSHIP}" | while IFS= read -r line; do
-    sudo chown ${CURRENT_USER_ID}:${CURRENT_GROUP_ID} "${line}"
+    chown ${CURRENT_USER_ID}:${CURRENT_GROUP_ID} "${line}"
     success "Ownership updated for ${line}"
     done
 

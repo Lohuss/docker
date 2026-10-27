@@ -132,6 +132,12 @@ services:
     container_name: cortex
     hostname: cortex
     restart: unless-stopped
+    # Not root: as root, the entrypoint gives the Docker socket to its own user (1001:1001),
+    # which locks TheHive Flow and the host docker group out
+    user: ${UID}:${GID}
+    # Docker socket access to run analyzers and responders in containers
+    group_add:
+      - "${docker_gid}"
     environment:
       - |
         JAVA_OPTS=
@@ -435,3 +441,7 @@ services:
 
 networks:
   thehive-cortex-network:
+    # Fixed range: allowlisted in the egress guard of TheHive Flow (thehive-flow/config/thehive-flow.yml)
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24

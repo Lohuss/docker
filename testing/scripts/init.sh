@@ -6,6 +6,7 @@
 source $(dirname $0)/output.sh         # Used to display output
 source $(dirname $0)/generate_certs.sh # Used to generate self signed or custom certificate
 source $(dirname $0)/setup_flow_access.sh # Used to create the TheHive service account and API key of TheHive Flow
+source $(dirname $0)/setup_cortex_access.sh # Used to initialise Cortex and register it in TheHive
 
 ASSUME_YES=${ASSUME_YES:-0}
 for arg in "$@"; do
@@ -118,6 +119,44 @@ setup_temporal() {
   fi
 }
 
+## Cortex and TheHive Flow run as the current user and reach the Docker socket through its group (docker_gid).
+## Sets DOCKER_GID from a source a Cortex container run as root cannot have altered (its entrypoint gives the
+## socket to 1001:1001), and gives the socket back to root:DOCKER_GID when it was altered.
+setup_docker_socket() {
+  local nginx_image socket_owner
+  nginx_image="nginx:$(grep -E "^nginx_image_version" ../versions.env | cut -d"'" -f2)"
+  socket_owner=$(docker run --rm --entrypoint stat -v /var/run/docker.sock:/var/run/docker.sock \
+    "${nginx_image}" -c '%u:%g' /var/run/docker.sock) || { error "Cannot read the Docker socket owner."; exit 1; }
+
+  if [[ "$(docker info --format '{{.OperatingSystem}}' 2> /dev/null)" == "Docker Desktop" ]]; then
+    ## Owner of the socket inside the Docker Desktop VM
+    DOCKER_GID=0
+  else
+    DOCKER_GID=$(getent group docker 2> /dev/null | cut -d: -f3)
+  fi
+  if [[ -z "${DOCKER_GID}" ]]; then
+    ## No reference: the current group of the socket, unless it is the one left by Cortex
+    if [[ "${socket_owner}" == "1001:1001" ]]; then
+      error "The Docker socket is owned by 1001:1001 (Cortex run as root) and its original group is unknown. Restart the Docker service, then run this script again."
+      exit 1
+    fi
+    DOCKER_GID=${socket_owner#*:}
+  fi
+
+  if [[ "${socket_owner}" != "0:${DOCKER_GID}" ]]; then
+    warning "The Docker socket is owned by ${socket_owner} instead of root:${DOCKER_GID}: Cortex, TheHive Flow and the docker group of the host may not be able to use it."
+    local choice="y"
+    [[ "${ASSUME_YES}" -eq 1 ]] || read -p "Restore the Docker socket owner to root:${DOCKER_GID} ? (y/n): " choice
+    if [[ "${choice}" != "y" && "${choice}" != "Y" ]]; then
+      error "Initialisation stopped: restore the Docker socket owner to root:${DOCKER_GID}, or restart Docker, then run this script again."
+      exit 1
+    fi
+    docker run --rm --entrypoint chown -v /var/run/docker.sock:/var/run/docker.sock \
+      "${nginx_image}" "0:${DOCKER_GID}" /var/run/docker.sock || { error "Cannot restore the Docker socket owner."; exit 1; }
+    success "Docker socket owner restored."
+  fi
+}
+
 init() {
     ELASTICSEARCH_PASSWORD=$(head -c 8192 /dev/urandom | LC_CTYPE=C tr -dc '[:alnum:]' | head -c 64)
 
@@ -168,6 +207,8 @@ _EOF_
         warning "${CORTEXSECRETFILE} file already exists and has not been modified."
     fi
 
+    setup_docker_socket
+
     ## CREATE .env FILE
     ENVFILE="./.env"
     if [ -f ${ENVFILE} ]
@@ -176,10 +217,6 @@ _EOF_
     fi
     CURRENT_USER_ID=$(id -u)
     CURRENT_GROUP_ID=$(id -g)
-    ## GID owning the Docker socket as seen from containers (differs from the host on Docker Desktop)
-    NGINX_VERSION=$(grep -E "^nginx_image_version" ../versions.env | cut -d"'" -f2)
-    DOCKER_GID=$(docker run --rm --entrypoint stat -v /var/run/docker.sock:/var/run/docker.sock \
-      "nginx:${NGINX_VERSION}" -c '%g' /var/run/docker.sock) || { error "Cannot read the Docker socket group."; exit 1; }
     sed -e "s/###CHANGEME_ELASTICSEARCH_PASSWORD###/$ELASTICSEARCH_PASSWORD/g" < ./dot.env.template > $ENVFILE
     cat ../versions.env >> .env
     # Ask user for service hostname
@@ -237,6 +274,7 @@ _EOF_
     setup_databases
     setup_temporal
     setup_thehive_flow_access
+    setup_cortex_access
 
     if [ ${STATUS} == 0 ]
     then
